@@ -356,12 +356,12 @@
     <comment>{Locked="Present1","FLIP_DISCARD","FLIP_SEQUENTIAL"}</comment>
   </data>
   <data name="Globals_SoftwareRendering.Header" xml:space="preserve">
-    <value>Use software rendering (WARP)</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
+    <value>Use software rendering (NEXTSHELL)</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
   </data>
   <data name="Globals_SoftwareRendering.HelpText" xml:space="preserve">
-    <value>When enabled, the terminal will use a software rasterizer (WARP). This setting should be left disabled under almost all circumstances.</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform".</comment>
+    <value>When enabled, the terminal will use a software rasterizer (NEXTSHELL). This setting should be left disabled under almost all circumstances.</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform".</comment>
   </data>
   <data name="Globals_TextMeasurement.Header" xml:space="preserve">
     <value>Text measurement mode</value>
@@ -2033,19 +2033,19 @@
     <comment>Text label for secondary button the color picker content dialog. When clicked, the operation of selecting a color is cancelled by the user.</comment>
   </data>
   <data name="Profile_CursorColor_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Use scheme color</value>
+    <value>Use cursor color from color scheme</value>
     <comment>Label for a button directing the user to use the cursor color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Foreground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Use scheme color</value>
+    <value>Use foreground color from color scheme</value>
     <comment>Label for a button directing the user to use the foreground color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Background_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Use scheme color</value>
+    <value>Use background color from color scheme</value>
     <comment>Label for a button directing the user to use the background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_SelectionBackground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Use scheme color</value>
+    <value>Use selection background color from color scheme</value>
     <comment>Label for a button directing the user to use the selection background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_IconTypeNone" xml:space="preserve">
@@ -2316,10 +2316,6 @@
     <value>MSYS2 (C:\ -> /c)</value>
     <comment>{Locked="MSYS2","C:\","/c"} An option to choose from for the "path translation" setting.</comment>
   </data>
-  <data name="Profile_PathTranslationStyleMinGW.Content" xml:space="preserve">
-    <value>MinGW (C:\ -> C:/)</value>
-    <comment>{Locked="MinGW","C:\","C:/"} An option to choose from for the "path translation" setting.</comment>
-  </data>
   <data name="Profile_Delete_Orphaned.Header" xml:space="preserve">
     <value>Profile no longer detected</value>
   </data>
@@ -2335,13 +2331,5 @@
   <data name="Profile_TabTitleNone" xml:space="preserve">
     <value>None</value>
     <comment>Text displayed when the tab title is not defined.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_DisabledByUser" xml:space="preserve">
-    <value>Automatic startup has been disabled in the Startup Apps section of Windows settings.</value>
-    <comment>{Locked="Windows"}This is displayed in concordance with Globals_StartOnUserLogin if the user has disabled the setting outside of the application.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_UnavailableByPolicy" xml:space="preserve">
-    <value>This option is managed by enterprise policy and cannot be changed here.</value>
-    <comment>This is displayed in concordance with Globals_StartOnUserLogin if the enterprise administrator has taken control of this setting.</comment>
   </data>
 </root>

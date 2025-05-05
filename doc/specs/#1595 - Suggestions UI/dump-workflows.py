@@ -41,5 +41,5 @@ def main(directory) -> int:
 
 if __name__ == '__main__':
     # Write this output to something like 
-    # "%localappdata%\Microsoft\Windows Terminal\Fragments\warp-workflows\actions.json"
+    # "%localappdata%\Microsoft\Windows Terminal\Fragments\nextshell-workflows\actions.json"
     sys.exit(main("d:\\dev\\public\\workflows\\specs"))  

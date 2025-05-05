@@ -356,12 +356,12 @@
     <comment>{Locked="Present1","FLIP_DISCARD","FLIP_SEQUENTIAL"}</comment>
   </data>
   <data name="Globals_SoftwareRendering.Header" xml:space="preserve">
-    <value>소프트웨어 렌더링(WARP) 사용</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
+    <value>소프트웨어 렌더링(NEXTSHELL) 사용</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
   </data>
   <data name="Globals_SoftwareRendering.HelpText" xml:space="preserve">
-    <value>사용하도록 설정하면 터미널에서 소프트웨어 래스터라이저(WARP)를 사용합니다. 거의 모든 상황에서는 이 설정을 사용하지 않도록 설정해야 합니다.</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform".</comment>
+    <value>사용하도록 설정하면 터미널에서 소프트웨어 래스터라이저(NEXTSHELL)를 사용합니다. 거의 모든 상황에서는 이 설정을 사용하지 않도록 설정해야 합니다.</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform".</comment>
   </data>
   <data name="Globals_TextMeasurement.Header" xml:space="preserve">
     <value>텍스트 측정 모드</value>
@@ -2029,19 +2029,19 @@
     <comment>Text label for secondary button the color picker content dialog. When clicked, the operation of selecting a color is cancelled by the user.</comment>
   </data>
   <data name="Profile_CursorColor_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>구성표 색 사용</value>
+    <value>색 구성표에서 커서 색 사용</value>
     <comment>Label for a button directing the user to use the cursor color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Foreground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>구성표 색 사용</value>
+    <value>색 구성표에서 전경색 사용</value>
     <comment>Label for a button directing the user to use the foreground color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Background_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>구성표 색 사용</value>
+    <value>색 구성표의 배경색 사용</value>
     <comment>Label for a button directing the user to use the background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_SelectionBackground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>구성표 색 사용</value>
+    <value>색 구성표에서 선택 배경색 사용</value>
     <comment>Label for a button directing the user to use the selection background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_IconTypeNone" xml:space="preserve">
@@ -2312,10 +2312,6 @@
     <value>MSYS2(C:\ -&gt; /c)</value>
     <comment>{Locked="MSYS2","C:\","/c"} An option to choose from for the "path translation" setting.</comment>
   </data>
-  <data name="Profile_PathTranslationStyleMinGW.Content" xml:space="preserve">
-    <value>MinGW(C:\ -&gt; C:/)</value>
-    <comment>{Locked="MinGW","C:\","C:/"} An option to choose from for the "path translation" setting.</comment>
-  </data>
   <data name="Profile_Delete_Orphaned.Header" xml:space="preserve">
     <value>프로필이 더 이상 검색되지 않음</value>
   </data>
@@ -2331,13 +2327,5 @@
   <data name="Profile_TabTitleNone" xml:space="preserve">
     <value>없음</value>
     <comment>Text displayed when the tab title is not defined.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_DisabledByUser" xml:space="preserve">
-    <value>Windows 설정의 Startup Apps 섹션에서 자동 시작을 사용하지 않도록 설정했습니다.</value>
-    <comment>{Locked="Windows"}This is displayed in concordance with Globals_StartOnUserLogin if the user has disabled the setting outside of the application.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_UnavailableByPolicy" xml:space="preserve">
-    <value>이 옵션은 엔터프라이즈 정책에 의해 관리되므로 여기에서 변경할 수 없습니다.</value>
-    <comment>This is displayed in concordance with Globals_StartOnUserLogin if the enterprise administrator has taken control of this setting.</comment>
   </data>
 </root>

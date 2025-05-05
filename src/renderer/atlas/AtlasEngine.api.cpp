@@ -426,9 +426,9 @@ void AtlasEngine::SetRetroTerminalEffect(bool enable) noexcept
 
 void AtlasEngine::SetSoftwareRendering(bool enable) noexcept
 {
-    if (_api.s->target->useWARP != enable)
+    if (_api.s->target->useNEXTSHELL != enable)
     {
-        _api.s.write()->target.write()->useWARP = enable;
+        _api.s.write()->target.write()->useNEXTSHELL = enable;
     }
 }
 

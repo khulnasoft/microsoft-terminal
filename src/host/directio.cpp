@@ -58,10 +58,12 @@ using Microsoft::Console::Interactivity::ServiceLocator;
                                                        const bool IsUnicode,
                                                        const bool IsPeek,
                                                        const bool IsWaitAllowed,
-                                                       CONSOLE_API_MSG* pWaitReplyMessage) noexcept
+                                                       std::unique_ptr<IWaitRoutine>& waiter) noexcept
 {
     try
     {
+        waiter.reset();
+
         if (eventReadCount == 0)
         {
             return STATUS_SUCCESS;
@@ -81,7 +83,9 @@ using Microsoft::Console::Interactivity::ServiceLocator;
         {
             // If we're told to wait until later, move all of our context
             // to the read data object and send it back up to the server.
-            std::ignore = ConsoleWaitQueue::s_CreateWait(pWaitReplyMessage, new DirectReadData(&inputBuffer, &readHandleState, eventReadCount));
+            waiter = std::make_unique<DirectReadData>(&inputBuffer,
+                                                      &readHandleState,
+                                                      eventReadCount);
         }
         return Status;
     }

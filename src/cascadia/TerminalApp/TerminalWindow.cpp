@@ -144,6 +144,7 @@ namespace winrt::TerminalApp::implementation
     {
         // Now that we know we can do XAML, build our page.
         _root = winrt::make_self<TerminalPage>(*_WindowProperties, _manager);
+        _dialog = ContentDialog{};
 
         // Pass in information about the initial state of the window.
         // * If we were supposed to start from serialized "content", do that,
@@ -312,15 +313,6 @@ namespace winrt::TerminalApp::implementation
     {
         return _settings.GlobalSettings().CurrentTheme();
     }
-
-    // WinUI can't show 2 dialogs simultaneously. Yes, really. If you do, you get an exception.
-    // As such, we must dismiss whatever dialog is currently being shown.
-    //
-    // This limit is of course per-thread and not per-window. Yes... really. See:
-    //   https://github.com/microsoft/microsoft-ui-xaml/issues/794
-    // The consequence is that we use a static variable to keep track of the shown dialog.
-    static ContentDialog s_activeDialog{ nullptr };
-
     // Method Description:
     // - Show a ContentDialog with buttons to take further action. Uses the
     //   FrameworkElements provided as the title and content of this dialog, and
@@ -336,32 +328,16 @@ namespace winrt::TerminalApp::implementation
     // - an IAsyncOperation with the dialog result
     winrt::Windows::Foundation::IAsyncOperation<ContentDialogResult> TerminalWindow::ShowDialog(winrt::WUX::Controls::ContentDialog dialog)
     {
-        // As mentioned on s_activeDialog, dismissing the active dialog is necessary.
-        // We repeat it a few times in case the resume_foreground failed to work,
-        // but I found that one iteration will always be enough in practice.
-        for (int i = 0; i < 3; ++i)
+        // DON'T release this lock in a wil::scope_exit. The scope_exit will get
+        // called when we await, which is not what we want.
+        std::unique_lock lock{ _dialogLock, std::try_to_lock };
+        if (!lock)
         {
-            if (!s_activeDialog)
-            {
-                break;
-            }
-
-            s_activeDialog.Hide();
-
-            // Wait for the current dialog to be hidden.
-            co_await wil::resume_foreground(_root->Dispatcher(), CoreDispatcherPriority::Low);
-        }
-
-        // If two sources call ShowDialog() simultaneously, it may happen that both enter the above loop,
-        // but it's crucial that only one of them continues below as only 1 dialog can be shown at a time.
-        // Thankfully, everything runs on the UI thread, so only 1 caller will exit the above loop at a time.
-        // So, if s_activeDialog is still set at this point, we must have lost the race.
-        if (s_activeDialog)
-        {
+            // Another dialog is visible.
             co_return ContentDialogResult::None;
         }
 
-        s_activeDialog = dialog;
+        _dialog = dialog;
 
         // IMPORTANT: This is necessary as documented in the ContentDialog MSDN docs.
         // Since we're hosting the dialog in a Xaml island, we need to connect it to the
@@ -391,26 +367,23 @@ namespace winrt::TerminalApp::implementation
             }
         } };
 
-        auto result = ContentDialogResult::None;
+        themingLambda(dialog, nullptr); // if it's already in the tree
+        auto loadedRevoker{ dialog.Loaded(winrt::auto_revoke, themingLambda) }; // if it's not yet in the tree
 
-        // Extra scope to drop the revoker before resetting the s_activeDialog to null.
-        {
-            themingLambda(dialog, nullptr); // if it's already in the tree
-            auto loadedRevoker{ dialog.Loaded(winrt::auto_revoke, themingLambda) }; // if it's not yet in the tree
-            result = co_await dialog.ShowAsync(Controls::ContentDialogPlacement::Popup);
-        }
+        // Display the dialog.
+        co_return co_await dialog.ShowAsync(Controls::ContentDialogPlacement::Popup);
 
-        s_activeDialog = nullptr;
-        co_return result;
+        // After the dialog is dismissed, the dialog lock (held by `lock`) will
+        // be released so another can be shown
     }
 
     // Method Description:
     // - Dismiss the (only) visible ContentDialog
     void TerminalWindow::DismissDialog()
     {
-        if (s_activeDialog)
+        if (auto localDialog = std::exchange(_dialog, nullptr))
         {
-            s_activeDialog.Hide();
+            localDialog.Hide();
         }
     }
 
@@ -1081,8 +1054,12 @@ namespace winrt::TerminalApp::implementation
     {
         _contentBounds = bounds;
 
-        const auto args = _contentStringToActions(content, true);
-        _initialContentArgs = wil::to_vector(args);
+        const auto& args = _contentStringToActions(content, true);
+
+        for (const auto& action : args)
+        {
+            _initialContentArgs.push_back(action);
+        }
     }
 
     // Method Description:
@@ -1108,7 +1085,7 @@ namespace winrt::TerminalApp::implementation
         if (_appArgs->ExitCode() == 0)
         {
             auto& parsedArgs = _appArgs->ParsedArgs();
-            auto& actions = parsedArgs.GetStartupActions();
+            auto actions = winrt::single_threaded_vector<ActionAndArgs>(std::move(parsedArgs.GetStartupActions()));
 
             _root->ProcessStartupActions(actions, false, _appArgs->CurrentDirectory(), _appArgs->CurrentEnvironment());
 
@@ -1223,7 +1200,7 @@ namespace winrt::TerminalApp::implementation
     {
         try
         {
-            const auto args = ActionAndArgs::Deserialize(content);
+            const auto& args = ActionAndArgs::Deserialize(content);
             if (args == nullptr ||
                 args.Size() == 0)
             {
@@ -1267,9 +1244,9 @@ namespace winrt::TerminalApp::implementation
 
             const bool replaceFirstWithNewTab = tabIndex >= _root->NumberOfTabs();
 
-            auto args = _contentStringToActions(content, replaceFirstWithNewTab);
+            const auto& args = _contentStringToActions(content, replaceFirstWithNewTab);
 
-            _root->AttachContent(std::move(args), tabIndex);
+            _root->AttachContent(args, tabIndex);
         }
     }
     void TerminalWindow::SendContentToOther(winrt::TerminalApp::RequestReceiveContentArgs args)

@@ -340,7 +340,7 @@ NT_CATCH_RETURN()
                                             INPUT_READ_HANDLE_DATA& readHandleState,
                                             const std::wstring_view exeName,
                                             const bool unicode,
-                                            CONSOLE_API_MSG* pWaitReplyMessage) noexcept
+                                            std::unique_ptr<IWaitRoutine>& waiter) noexcept
 {
     auto& gci = ServiceLocator::LocateGlobals().getConsoleInformation();
     RETURN_HR_IF(E_FAIL, !gci.HasActiveOutputBuffer());
@@ -364,8 +364,7 @@ NT_CATCH_RETURN()
         if (!cookedReadData->Read(unicode, bytesRead, controlKeyState))
         {
             // memory will be cleaned up by wait queue
-            std::ignore = ConsoleWaitQueue::s_CreateWait(pWaitReplyMessage, cookedReadData.release());
-            return CONSOLE_STATUS_WAIT;
+            waiter.reset(cookedReadData.release());
         }
         else
         {
@@ -469,22 +468,24 @@ NT_CATCH_RETURN()
 // populated.
 // - STATUS_SUCCESS on success
 // - Other NSTATUS codes as necessary
-[[nodiscard]] HRESULT DoReadConsole(InputBuffer& inputBuffer,
-                                    const HANDLE processData,
-                                    std::span<char> buffer,
-                                    size_t& bytesRead,
-                                    ULONG& controlKeyState,
-                                    const std::wstring_view initialData,
-                                    const DWORD ctrlWakeupMask,
-                                    INPUT_READ_HANDLE_DATA& readHandleState,
-                                    const std::wstring_view exeName,
-                                    const bool unicode,
-                                    CONSOLE_API_MSG* pWaitReplyMessage) noexcept
+[[nodiscard]] NTSTATUS DoReadConsole(InputBuffer& inputBuffer,
+                                     const HANDLE processData,
+                                     std::span<char> buffer,
+                                     size_t& bytesRead,
+                                     ULONG& controlKeyState,
+                                     const std::wstring_view initialData,
+                                     const DWORD ctrlWakeupMask,
+                                     INPUT_READ_HANDLE_DATA& readHandleState,
+                                     const std::wstring_view exeName,
+                                     const bool unicode,
+                                     std::unique_ptr<IWaitRoutine>& waiter) noexcept
 {
     try
     {
         LockConsole();
         auto Unlock = wil::scope_exit([&] { UnlockConsole(); });
+
+        waiter.reset();
 
         bytesRead = 0;
 
@@ -503,17 +504,17 @@ NT_CATCH_RETURN()
         }
         else if (WI_IsFlagSet(inputBuffer.InputMode, ENABLE_LINE_INPUT))
         {
-            return _ReadLineInput(inputBuffer,
-                                  processData,
-                                  buffer,
-                                  bytesRead,
-                                  controlKeyState,
-                                  initialData,
-                                  ctrlWakeupMask,
-                                  readHandleState,
-                                  exeName,
-                                  unicode,
-                                  pWaitReplyMessage);
+            return NTSTATUS_FROM_HRESULT(_ReadLineInput(inputBuffer,
+                                                        processData,
+                                                        buffer,
+                                                        bytesRead,
+                                                        controlKeyState,
+                                                        initialData,
+                                                        ctrlWakeupMask,
+                                                        readHandleState,
+                                                        exeName,
+                                                        unicode,
+                                                        waiter));
         }
         else
         {
@@ -524,7 +525,7 @@ NT_CATCH_RETURN()
                                                    unicode);
             if (status == CONSOLE_STATUS_WAIT)
             {
-                std::ignore = ConsoleWaitQueue::s_CreateWait(pWaitReplyMessage, new RAW_READ_DATA(&inputBuffer, &readHandleState, gsl::narrow<ULONG>(buffer.size()), reinterpret_cast<wchar_t*>(buffer.data())));
+                waiter = std::make_unique<RAW_READ_DATA>(&inputBuffer, &readHandleState, gsl::narrow<ULONG>(buffer.size()), reinterpret_cast<wchar_t*>(buffer.data()));
             }
             return status;
         }
@@ -535,7 +536,7 @@ NT_CATCH_RETURN()
 [[nodiscard]] HRESULT ApiRoutines::ReadConsoleImpl(IConsoleInputObject& context,
                                                    std::span<char> buffer,
                                                    size_t& written,
-                                                   CONSOLE_API_MSG* pWaitReplyMessage,
+                                                   std::unique_ptr<IWaitRoutine>& waiter,
                                                    const std::wstring_view initialData,
                                                    const std::wstring_view exeName,
                                                    INPUT_READ_HANDLE_DATA& readHandleState,
@@ -544,17 +545,17 @@ NT_CATCH_RETURN()
                                                    const DWORD controlWakeupMask,
                                                    DWORD& controlKeyState) noexcept
 {
-    return DoReadConsole(context,
-                         clientHandle,
-                         buffer,
-                         written,
-                         controlKeyState,
-                         initialData,
-                         controlWakeupMask,
-                         readHandleState,
-                         exeName,
-                         IsUnicode,
-                         pWaitReplyMessage);
+    return HRESULT_FROM_NT(DoReadConsole(context,
+                                         clientHandle,
+                                         buffer,
+                                         written,
+                                         controlKeyState,
+                                         initialData,
+                                         controlWakeupMask,
+                                         readHandleState,
+                                         exeName,
+                                         IsUnicode,
+                                         waiter));
 }
 
 void UnblockWriteConsole(const DWORD dwReason)

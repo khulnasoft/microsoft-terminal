@@ -2450,7 +2450,7 @@
           "type": "boolean"
         },
         "rendering.software": {
-          "description": "When enabled, the terminal will use a software rasterizer (WARP). This setting should be left disabled under almost all circumstances.",
+          "description": "When enabled, the terminal will use a software rasterizer (NEXTSHELL). This setting should be left disabled under almost all circumstances.",
           "type": "boolean"
         },
         "experimental.input.forceVT": {
@@ -2479,6 +2479,11 @@
           "maximum": 999,
           "minimum": 1,
           "type": "integer"
+        },
+        "startOnUserLogin": {
+          "default": false,
+          "description": "When set to true, this enables the launch of Terminal at startup. Setting this to false will disable the startup task entry. If the Terminal startup task entry is disabled either by org policy or by user action this setting will have no effect.",
+          "type": "boolean"
         },
         "firstWindowPreference": {
           "default": "defaultProfile",
@@ -3114,13 +3119,12 @@
         },
         "pathTranslationStyle": {
           "default": "none",
-          "description": "Controls how file paths are transformed when they are dragged and dropped on the terminal. Possible values are \"none\", \"wsl\", \"cygwin\", \"msys2\" and \"mingw\".",
+          "description": "Controls how file paths are transformed when they are dragged and dropped on the terminal. Possible values are \"none\", \"wsl\", \"cygwin\" and \"msys2\".",
           "enum": [
             "none",
             "wsl",
             "cygwin",
-            "msys2",
-            "mingw"
+            "msys2"
           ],
           "type": "string"
         }

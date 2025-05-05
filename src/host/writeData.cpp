@@ -6,9 +6,8 @@
 
 #include "_stream.h"
 #include "../types/inc/convert.hpp"
-#include "../interactivity/inc/ServiceLocator.hpp"
 
-using Microsoft::Console::Interactivity::ServiceLocator;
+#include "../interactivity/inc/ServiceLocator.hpp"
 
 // Routine Description:
 // - Creates a new write data object for used in servicing write console requests
@@ -23,22 +22,31 @@ using Microsoft::Console::Interactivity::ServiceLocator;
 // Return Value:
 // - THROW: Throws if space cannot be allocated to copy the given string
 WriteData::WriteData(SCREEN_INFORMATION& siContext,
-                     std::wstring pwchContext,
+                     _In_reads_bytes_(cbContext) PCWCHAR pwchContext,
+                     const size_t cbContext,
                      const UINT uiOutputCodepage) :
     IWaitRoutine(ReplyDataType::Write),
     _siContext(siContext),
-    _pwchContext(std::move(pwchContext)),
+    _pwchContext(THROW_IF_NULL_ALLOC(reinterpret_cast<wchar_t*>(new byte[cbContext]))),
+    _cbContext(cbContext),
     _uiOutputCodepage(uiOutputCodepage),
     _fLeadByteCaptured(false),
     _fLeadByteConsumed(false),
     _cchUtf8Consumed(0)
 {
+    memmove(_pwchContext, pwchContext, _cbContext);
 }
 
 // Routine Description:
 // - Destroys the write data object
 // - Frees the string copy we made on creation
-WriteData::~WriteData() = default;
+WriteData::~WriteData()
+{
+    if (nullptr != _pwchContext)
+    {
+        delete[] _pwchContext;
+    }
+}
 
 // Routine Description:
 // - Stores some additional information about lead byte adjustments from the conversion
@@ -94,19 +102,13 @@ bool WriteData::Notify(const WaitTerminationReason TerminationReason,
                        _Out_ DWORD* const pControlKeyState,
                        _Out_ void* const /*pOutputData*/)
 {
-    *pNumBytes = 0;
+    *pNumBytes = _cbContext;
     *pControlKeyState = 0;
 
     if (WI_IsFlagSet(TerminationReason, WaitTerminationReason::ThreadDying))
     {
         *pReplyStatus = STATUS_THREAD_IS_TERMINATING;
         return true;
-    }
-
-    auto& gci = ServiceLocator::LocateGlobals().getConsoleInformation();
-    if (WI_IsAnyFlagSet(gci.Flags, (CONSOLE_SUSPENDED | CONSOLE_SELECTING | CONSOLE_SCROLLBAR_TRACKING)))
-    {
-        return false;
     }
 
     // if we get to here, this routine was called by the input
@@ -117,15 +119,19 @@ bool WriteData::Notify(const WaitTerminationReason TerminationReason,
 
     FAIL_FAST_IF(!(Microsoft::Console::Interactivity::ServiceLocator::LocateGlobals().getConsoleInformation().IsConsoleLocked()));
 
-    auto Status = DoWriteConsole(_siContext, _pwchContext);
+    std::unique_ptr<WriteData> waiter;
+    auto cbContext = _cbContext;
+    auto Status = DoWriteConsole(_pwchContext,
+                                 &cbContext,
+                                 _siContext,
+                                 waiter);
 
     if (Status == CONSOLE_STATUS_WAIT)
     {
         // an extra waiter will be created by DoWriteConsole, but we're already a waiter so discard it.
+        waiter.reset();
         return false;
     }
-
-    auto cbContext = _pwchContext.size();
 
     // There's extra work to do to correct the byte counts if the original call was an A-version call.
     // We always process and hold text in the waiter as W-version text, but the A call is expecting
@@ -134,6 +140,10 @@ bool WriteData::Notify(const WaitTerminationReason TerminationReason,
     {
         if (CP_UTF8 != _uiOutputCodepage)
         {
+            // At this level with WriteConsole, everything is byte counts, so change back to char counts for
+            // GetALengthFromW to work correctly.
+            const auto cchContext = cbContext / sizeof(wchar_t);
+
             // For non-UTF-8 codepages, we need to back convert the amount consumed and then
             // correlate that with any lead bytes we may have kept for later or reintroduced
             // from previous calls.
@@ -142,7 +152,7 @@ bool WriteData::Notify(const WaitTerminationReason TerminationReason,
             // Start by counting the number of A bytes we used in printing our W string to the screen.
             try
             {
-                cchTextBufferRead = GetALengthFromW(_uiOutputCodepage, _pwchContext);
+                cchTextBufferRead = GetALengthFromW(_uiOutputCodepage, { _pwchContext, cchContext });
             }
             CATCH_LOG();
 

@@ -354,7 +354,7 @@
     <value>タブのタイトルをリセット</value>
   </data>
   <data name="OpenTabRenamerCommandKey" xml:space="preserve">
-    <value>タブ名を変更</value>
+    <value>[名前の変更] タブ</value>
   </data>
   <data name="ResizePaneCommandKey" xml:space="preserve">
     <value>ウィンドウのサイズの変更する</value>

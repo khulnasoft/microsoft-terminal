@@ -724,6 +724,10 @@ IStateMachineEngine::StringHandler OutputStateMachineEngine::ActionDcsDispatch(c
     case DcsActionCodes::DECRSPS_RestorePresentationState:
         handler = _dispatch->RestorePresentationState(parameters.at(0));
         break;
+    case DcsActionCodes::DCS_NEXTSHELL:
+        _dispatch->DoNextshellAction();
+        handler = nullptr;
+        break;
     default:
         handler = nullptr;
         break;
@@ -810,40 +814,10 @@ bool OutputStateMachineEngine::ActionOscDispatch(const size_t parameter, const s
         }
         break;
     }
-    case OscActionCodes::ResetColor:
-    {
-        if (string.empty())
-        {
-            _dispatch->ResetColorTable();
-        }
-        else
-        {
-            for (auto&& c : til::split_iterator{ string, L';' })
-            {
-                if (const auto index{ til::parse_unsigned<size_t>(c, 10) }; index)
-                {
-                    _dispatch->ResetColorTableEntry(*index);
-                }
-                else
-                {
-                    // NOTE: xterm stops at the first unparseable index whereas VTE keeps going.
-                    break;
-                }
-            }
-        }
-        break;
-    }
-    case OscActionCodes::ResetForegroundColor:
-    case OscActionCodes::ResetBackgroundColor:
     case OscActionCodes::ResetCursorColor:
-    case OscActionCodes::ResetHighlightColor:
     {
-        // NOTE: xterm ignores the request if there's any parameters whereas VTE resets the provided index and ignores the rest
-        if (string.empty())
-        {
-            // The reset codes for xterm dynamic resources are the set codes + 100
-            _dispatch->ResetXtermColorResource(parameter - 100u);
-        }
+        // The reset codes for xterm dynamic resources are the set codes + 100
+        _dispatch->SetXtermColorResource(parameter - 100u, INVALID_COLOR);
         break;
     }
     case OscActionCodes::Hyperlink:
@@ -871,6 +845,21 @@ bool OutputStateMachineEngine::ActionOscDispatch(const size_t parameter, const s
     case OscActionCodes::ITerm2Action:
     {
         _dispatch->DoITerm2Action(string);
+        break;
+    }
+    case OscActionCodes::NextshellInBandGeneratorAction:
+    {
+        _dispatch->DoNextshellInBandGeneratorAction();
+        break;
+    }
+    case OscActionCodes::NextshellAction:
+    {
+        _dispatch->DoNextshellAction();
+        break;
+    }
+    case OscActionCodes::NextshellResetGridAction:
+    {
+        _dispatch->DoNextshellResetGridAction();
         break;
     }
     case OscActionCodes::FinalTermAction:

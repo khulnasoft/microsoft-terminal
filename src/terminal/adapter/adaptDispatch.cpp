@@ -1914,13 +1914,6 @@ void AdaptDispatch::_ModeParamsHelper(const DispatchTypes::ModeParams param, con
     case DispatchTypes::ModeParams::XTERM_BracketedPasteMode:
         _api.SetSystemMode(ITerminalApi::Mode::BracketedPaste, enable);
         break;
-    case DispatchTypes::ModeParams::SO_SynchronizedOutput:
-        _renderSettings.SetRenderMode(RenderSettings::Mode::SynchronizedOutput, enable);
-        if (_renderer)
-        {
-            _renderer->SynchronizedOutputChanged();
-        }
-        break;
     case DispatchTypes::ModeParams::GCM_GraphemeClusterMode:
         break;
     case DispatchTypes::ModeParams::W32IM_Win32InputMode:
@@ -2058,9 +2051,6 @@ void AdaptDispatch::RequestMode(const DispatchTypes::ModeParams param)
         break;
     case DispatchTypes::ModeParams::XTERM_BracketedPasteMode:
         state = mapTemp(_api.GetSystemMode(ITerminalApi::Mode::BracketedPaste));
-        break;
-    case DispatchTypes::ModeParams::SO_SynchronizedOutput:
-        state = mapTemp(_renderSettings.GetRenderMode(RenderSettings::Mode::SynchronizedOutput));
         break;
     case DispatchTypes::ModeParams::GCM_GraphemeClusterMode:
         state = mapPerm(CodepointWidthDetector::Singleton().GetMode() == TextMeasurementMode::Graphemes);
@@ -3047,7 +3037,6 @@ void AdaptDispatch::HardReset()
     if (_renderer)
     {
         _renderer->TriggerRedrawAll(true, true);
-        _renderer->SynchronizedOutputChanged();
     }
 
     // Cursor to 1,1 - the Soft Reset guarantees this is absolute
@@ -3303,40 +3292,6 @@ void AdaptDispatch::RequestColorTableEntry(const size_t tableIndex)
     }
 }
 
-void AdaptDispatch::ResetColorTable()
-{
-    _renderSettings.RestoreDefaultIndexed256ColorTable();
-    if (_renderer)
-    {
-        // This is pessimistic because it's unlikely that the frame or background changed,
-        // but let's tell the renderer that both changed anyway.
-        _renderer->TriggerRedrawAll(true, true);
-    }
-}
-
-// Method Description:
-// - Restores a single color table entry to its default user-specified value
-// Arguments:
-// - tableIndex: The VT color table index
-void AdaptDispatch::ResetColorTableEntry(const size_t tableIndex)
-{
-    _renderSettings.RestoreDefaultColorTableEntry(tableIndex);
-
-    if (_renderer)
-    {
-        // If we're updating the background color, we need to let the renderer
-        // know, since it may want to repaint the window background to match.
-        const auto backgroundIndex = _renderSettings.GetColorAliasIndex(ColorAlias::DefaultBackground);
-        const auto backgroundChanged = (tableIndex == backgroundIndex);
-
-        // Similarly for the frame color, the tab may need to be repainted.
-        const auto frameIndex = _renderSettings.GetColorAliasIndex(ColorAlias::FrameBackground);
-        const auto frameChanged = (tableIndex == frameIndex);
-
-        _renderer->TriggerRedrawAll(backgroundChanged, frameChanged);
-    }
-}
-
 // Method Description:
 // - Sets one Xterm Color Resource such as Default Foreground, Background, Cursor
 void AdaptDispatch::SetXtermColorResource(const size_t resource, const DWORD color)
@@ -3380,25 +3335,6 @@ void AdaptDispatch::RequestXtermColorResource(const size_t resource)
             // Scale values up to match xterm's 16-bit color report format.
             _ReturnOscResponse(fmt::format(FMT_COMPILE(L"{};rgb:{:04x}/{:04x}/{:04x}"), resource, c.r * 0x0101, c.g * 0x0101, c.b * 0x0101));
         }
-    }
-}
-
-// Method Description:
-// - Restores to the original user-provided value one Xterm Color Resource such as Default Foreground, Background, Cursor
-void AdaptDispatch::ResetXtermColorResource(const size_t resource)
-{
-    assert(resource >= 10);
-    const auto mappingIndex = resource - 10;
-    const auto& oscMapping = XtermResourceColorTableMappings.at(mappingIndex);
-    if (oscMapping.ColorTableIndex > 0)
-    {
-        if (oscMapping.AliasIndex >= 0)
-        {
-            // If this color reset applies to an aliased color, point the alias back at the original color
-            _renderSettings.RestoreDefaultColorAliasIndex(static_cast<ColorAlias>(oscMapping.AliasIndex));
-        }
-
-        ResetColorTableEntry(oscMapping.ColorTableIndex);
     }
 }
 
@@ -3633,6 +3569,67 @@ void AdaptDispatch::DoITerm2Action(const std::wstring_view string)
     {
         _pages.ActivePage().Buffer().StartPrompt();
     }
+}
+
+// Method Description:
+// - Performs a iTerm2 action
+// - Ascribes to the ITermDispatch interface
+// - Currently, the actions we support are:
+//   * `OSC1337;SetMark`: mark a line as a prompt line
+// - Not actually used in conhost
+// Arguments:
+// - string: contains the parameters that define which action we do
+// Return Value:
+// - false in conhost, true for the SetMark action, otherwise false.
+void AdaptDispatch::DoNextshellAction()
+{
+    // const auto isConPty = _api.IsConsolePty();
+    // if (isConPty)
+    // {
+    //     // Flush the frame manually, to make sure marks end up on the right
+    //     // line, like the alt buffer sequence.
+    //      _renderer.TriggerFlush(false);
+    //     //CursorPosition(1, 1);
+    // }
+}
+
+// Method Description:
+// - Performs a iTerm2 action
+// - Ascribes to the ITermDispatch interface
+// - Currently, the actions we support are:
+//   * `OSC1337;SetMark`: mark a line as a prompt line
+// - Not actually used in conhost
+// Arguments:
+// - string: contains the parameters that define which action we do
+// Return Value:
+// - false in conhost, true for the SetMark action, otherwise false.
+void AdaptDispatch::DoNextshellInBandGeneratorAction()
+{
+    // const auto isConPty = _api.IsConsolePty();
+    // if (isConPty)
+    // {
+    //     // Flush the frame manually, to make sure marks end up on the right
+    //     // line, like the alt buffer sequence.
+    //     _renderer.TriggerFlush(false);
+    // }
+}
+
+void AdaptDispatch::DoNextshellResetGridAction()
+{
+    // const auto isConPty = _api.IsConsolePty();
+    // if (isConPty)
+    // {
+    //     // Flush the frame manually, to make sure marks end up on the right
+    //     // line, like the alt buffer sequence.
+    //     _renderer.TriggerFlush(false);
+
+        // Clear grid without painting.
+        // ATODO: Anything else we need to reset here?
+        CursorPosition(1, 1);
+        _pages.ActivePage().Buffer().Reset();
+        // _renderer.TriggerFlush(false);
+        // //_pages.ActivePage().Buffer().Reset();
+    // }
 }
 
 // Method Description:

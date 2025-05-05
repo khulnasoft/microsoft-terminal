@@ -356,12 +356,12 @@
     <comment>{Locked="Present1","FLIP_DISCARD","FLIP_SEQUENTIAL"}</comment>
   </data>
   <data name="Globals_SoftwareRendering.Header" xml:space="preserve">
-    <value>Ųѕε ŝόƒťщаřė яĕŋðεříлğ (WARP) !!! !!! !!!</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
+    <value>Ųѕε ŝόƒťщаřė яĕŋðεříлğ (NEXTSHELL) !!! !!! !!!</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform". This text is shown next to a toggle.</comment>
   </data>
   <data name="Globals_SoftwareRendering.HelpText" xml:space="preserve">
-    <value>Ẅнέⁿ éñâвĺĕď, ŧĥë тěřmϊñăľ шîľĺ ŭşē ă şóƒтшářě яãѕтĕгīżεŕ (WARP). Тћįş ŝеţŧΐπģ śнσύŀδ вё ĺєƒŧ δїşâьĺεδ ύπďέя ªℓмôšţ áŀł ćϊŕçϋмśтąпćēѕ. !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !</value>
-    <comment>{Locked="WARP"} WARP is the "Windows Advanced Rasterization Platform".</comment>
+    <value>Ẅнέⁿ éñâвĺĕď, ŧĥë тěřmϊñăľ шîľĺ ŭşē ă şóƒтшářě яãѕтĕгīżεŕ (NEXTSHELL). Тћįş ŝеţŧΐπģ śнσύŀδ вё ĺєƒŧ δїşâьĺεδ ύπďέя ªℓмôšţ áŀł ćϊŕçϋмśтąпćēѕ. !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !!! !</value>
+    <comment>{Locked="NEXTSHELL"} NEXTSHELL is the "Windows Advanced Rasterization Platform".</comment>
   </data>
   <data name="Globals_TextMeasurement.Header" xml:space="preserve">
     <value>Τéжτ mĕαšûяēмєñţ мόðë !!! !!!</value>
@@ -2033,19 +2033,19 @@
     <comment>Text label for secondary button the color picker content dialog. When clicked, the operation of selecting a color is cancelled by the user.</comment>
   </data>
   <data name="Profile_CursorColor_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Ùŝë ŝčĥзмё çσľōř !!! !</value>
+    <value>Ùŝë ćυŗšθг çσľōř ƒŗōm ĉöŀøя śĉнзмé !!! !!! !!! !</value>
     <comment>Label for a button directing the user to use the cursor color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Foreground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Ŭŝě şςђęmε ¢оłöř !!! !</value>
+    <value>Ŭŝě ƒθгęĝѓóϋňď ćǿłõѓ ƒŕõм сöℓòя şçĥέмё !!! !!! !!! !!</value>
     <comment>Label for a button directing the user to use the foreground color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_Background_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Ůśĕ śĉħемë ¢ōĺóř !!! !</value>
+    <value>Ůśĕ вäćкģŗòŭиð ćôℓοѓ ƒŕǿm čòℓôѓ śςĥëmē !!! !!! !!! !!</value>
     <comment>Label for a button directing the user to use the background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_SelectionBackground_NullableColorPicker.NullColorButtonLabel" xml:space="preserve">
-    <value>Ůŝë śĉћ℮mĕ çòĺőг !!! !</value>
+    <value>Ůŝë śęŀ℮çťïòл ьαćкğŕόµńđ çøłôř ƒŗоm ¢οłõг ş¢нέмё !!! !!! !!! !!! !!</value>
     <comment>Label for a button directing the user to use the selection background color defined in the terminal's current color scheme.</comment>
   </data>
   <data name="Profile_IconTypeNone" xml:space="preserve">
@@ -2316,10 +2316,6 @@
     <value>MSYS2 (C:\ -&gt; /c) !!! !!</value>
     <comment>{Locked="MSYS2","C:\","/c"} An option to choose from for the "path translation" setting.</comment>
   </data>
-  <data name="Profile_PathTranslationStyleMinGW.Content" xml:space="preserve">
-    <value>MinGW (C:\ -&gt; C:/) !!! !!</value>
-    <comment>{Locked="MinGW","C:\","C:/"} An option to choose from for the "path translation" setting.</comment>
-  </data>
   <data name="Profile_Delete_Orphaned.Header" xml:space="preserve">
     <value>Ρřσƒīŀē ⁿο łøňġèя ðёτęςτęď !!! !!! !</value>
   </data>
@@ -2335,13 +2331,5 @@
   <data name="Profile_TabTitleNone" xml:space="preserve">
     <value>Ŋøиє !</value>
     <comment>Text displayed when the tab title is not defined.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_DisabledByUser" xml:space="preserve">
-    <value>Åΰťόмåтίĉ śţдѓтΰρ ћăş ьěёή δіѕªъľēð ïй ťĥ℮ Ŝťǻřťúφ Āρφŝ ѕěĉŧϊōη бƒ Windows ŝεтţīŋĝś. !!! !!! !!! !!! !!! !!! !!! !!! !</value>
-    <comment>{Locked="Windows"}This is displayed in concordance with Globals_StartOnUserLogin if the user has disabled the setting outside of the application.</comment>
-  </data>
-  <data name="Globals_StartOnUserLogin_UnavailableByPolicy" xml:space="preserve">
-    <value>Ţĥîŝ όρтįοñ íş мαпªģéð ъý ĕŋτéřрŗĭšз рôľĩсу алð çąňηōт ье ċħâήğèď ћēяē. !!! !!! !!! !!! !!! !!! !!!</value>
-    <comment>This is displayed in concordance with Globals_StartOnUserLogin if the enterprise administrator has taken control of this setting.</comment>
   </data>
 </root>

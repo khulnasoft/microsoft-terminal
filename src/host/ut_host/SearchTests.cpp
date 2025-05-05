@@ -23,14 +23,20 @@ class SearchTests
     TEST_CLASS_SETUP(ClassSetup)
     {
         m_state = new CommonState();
+
+        m_state->PrepareGlobalRenderer();
         m_state->PrepareGlobalScreenBuffer();
+
         return true;
     }
 
     TEST_CLASS_CLEANUP(ClassCleanup)
     {
         m_state->CleanupGlobalScreenBuffer();
+        m_state->CleanupGlobalRenderer();
+
         delete m_state;
+
         return true;
     }
 
