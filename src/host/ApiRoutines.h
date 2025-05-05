@@ -56,12 +56,12 @@ public:
                                               const bool IsUnicode,
                                               const bool IsPeek,
                                               const bool IsWaitAllowed,
-                                              CONSOLE_API_MSG* pWaitReplyMessage) noexcept override;
+                                              std::unique_ptr<IWaitRoutine>& waiter) noexcept override;
 
     [[nodiscard]] HRESULT ReadConsoleImpl(IConsoleInputObject& context,
                                           std::span<char> buffer,
                                           size_t& written,
-                                          CONSOLE_API_MSG* pWaitReplyMessage,
+                                          std::unique_ptr<IWaitRoutine>& waiter,
                                           const std::wstring_view initialData,
                                           const std::wstring_view exeName,
                                           INPUT_READ_HANDLE_DATA& readHandleState,
@@ -73,12 +73,12 @@ public:
     [[nodiscard]] HRESULT WriteConsoleAImpl(IConsoleOutputObject& context,
                                             const std::string_view buffer,
                                             size_t& read,
-                                            CONSOLE_API_MSG* pWaitReplyMessage) noexcept override;
+                                            std::unique_ptr<IWaitRoutine>& waiter) noexcept override;
 
     [[nodiscard]] HRESULT WriteConsoleWImpl(IConsoleOutputObject& context,
                                             const std::wstring_view buffer,
                                             size_t& read,
-                                            CONSOLE_API_MSG* pWaitReplyMessage) noexcept override;
+                                            std::unique_ptr<IWaitRoutine>& waiter) noexcept override;
 
 #pragma region ThreadCreationInfo
     [[nodiscard]] HRESULT GetConsoleLangIdImpl(LANGID& langId) noexcept override;

@@ -27,8 +27,6 @@ typedef InputBuffer IConsoleInputObject;
 
 class INPUT_READ_HANDLE_DATA;
 
-typedef struct _CONSOLE_API_MSG CONSOLE_API_MSG;
-
 #include "IWaitRoutine.h"
 #include "../types/inc/IInputEvent.hpp"
 #include "../types/inc/viewport.hpp"
@@ -66,12 +64,12 @@ public:
                                                       const bool IsUnicode,
                                                       const bool IsPeek,
                                                       const bool IsWaitAllowed,
-                                                      CONSOLE_API_MSG* pWaitReplyMessage) noexcept = 0;
+                                                      std::unique_ptr<IWaitRoutine>& waiter) noexcept = 0;
 
     [[nodiscard]] virtual HRESULT ReadConsoleImpl(IConsoleInputObject& context,
                                                   std::span<char> buffer,
                                                   size_t& written,
-                                                  CONSOLE_API_MSG* pWaitReplyMessage,
+                                                  std::unique_ptr<IWaitRoutine>& waiter,
                                                   const std::wstring_view initialData,
                                                   const std::wstring_view exeName,
                                                   INPUT_READ_HANDLE_DATA& readHandleState,
@@ -83,12 +81,12 @@ public:
     [[nodiscard]] virtual HRESULT WriteConsoleAImpl(IConsoleOutputObject& context,
                                                     const std::string_view buffer,
                                                     size_t& read,
-                                                    CONSOLE_API_MSG* pWaitReplyMessage) noexcept = 0;
+                                                    std::unique_ptr<IWaitRoutine>& waiter) noexcept = 0;
 
     [[nodiscard]] virtual HRESULT WriteConsoleWImpl(IConsoleOutputObject& context,
                                                     const std::wstring_view buffer,
                                                     size_t& read,
-                                                    CONSOLE_API_MSG* pWaitReplyMessage) noexcept = 0;
+                                                    std::unique_ptr<IWaitRoutine>& waiter) noexcept = 0;
 
 #pragma region Thread Creation Info
     [[nodiscard]] virtual HRESULT GetConsoleLangIdImpl(LANGID& langId) noexcept = 0;

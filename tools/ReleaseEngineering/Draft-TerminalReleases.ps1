@@ -30,7 +30,6 @@ Enum AssetType {
 	Unknown
 	ApplicationBundle
 	PreinstallKit
-	GroupPolicy
 	Zip
 }
 
@@ -84,9 +83,6 @@ Class Asset {
 			$local:bundlePath = Join-Path $local:directory $local:bundleName
 			$this.Type = [AssetType]::PreinstallKit
 			$this.Architecture = "all"
-		} ElseIf (".zip" -eq $local:ext -and $local:filename -like 'GroupPolicy*') {
-			$this.Type = [AssetType]::GroupPolicy
-			$this.Architecture = "all"
 		} ElseIf (".zip" -eq $local:ext) {
 			$this.Type = [AssetType]::Zip
 		} ElseIf (".msixbundle" -eq $local:ext) {
@@ -94,7 +90,7 @@ Class Asset {
 			$this.Architecture = "all"
 		}
 
-		If ($this.Type -In ([AssetType]::ApplicationBundle, [AssetType]::PreinstallKit)) {
+		If ($this.Type -Ne [AssetType]::Zip) {
 			Write-Verbose "Cracking bundle $($local:bundlePath)"
 			$local:firstMsixName = & $script:tar -t -f $local:bundlePath |
 				Select-String 'Cascadia.*\.msix' |
@@ -109,10 +105,8 @@ Class Asset {
 			$local:Manifest = [xml](Get-Content (Join-Path $local:directory AppxManifest.xml))
 			$this.ParseManifest($local:Manifest)
 		} Else {
-			If ($this.Type -Ne [AssetType]::GroupPolicy) {
-				& $script:tar -x -f $this.Path -C $local:directory --strip-components=1 '*/wt.exe'
-				$this.ExpandedVersion = (Get-Item (Join-Path $local:directory wt.exe)).VersionInfo.ProductVersion
-			}
+			& $script:tar -x -f $this.Path -C $local:directory --strip-components=1 '*/wt.exe'
+			$this.ExpandedVersion = (Get-Item (Join-Path $local:directory wt.exe)).VersionInfo.ProductVersion
 
 			# Zip files just encode everything in their filename. Not great, but workable.
 			$this.ParseFilename($local:filename)
@@ -139,9 +133,7 @@ Class Asset {
 		$parts = [IO.Path]::GetFileNameWithoutExtension($filename).Split("_")
 		$this.Name = $parts[0]
 		$this.Version = $parts[1]
-		If ($parts.Length -Ge 3) {
-			$this.Architecture = $parts[2]
-		}
+		$this.Architecture = $parts[2]
 	}
 
 	[string]IdealFilename() {
@@ -156,9 +148,6 @@ Class Asset {
 			}
 			Zip {
 				"{0}_{1}_{2}.zip" -f ($this.Name, $this.Version, $this.Architecture)
-			}
-			GroupPolicy {
-				"{0}_{1}.zip" -f ($this.Name, $this.Version)
 			}
 			Default {
 				Throw "Unknown type $($_.Type)"
@@ -185,7 +174,7 @@ class Release {
 
 	Release([Asset[]]$a) {
 		$this.Assets = $a
-		$this.Branding = $a | Where-Object Branding -Ne ([Branding]::Unknown) | Select -Unique -First 1 -Expand Branding
+		$this.Branding = $a[0].Branding
 		$this.Name = Switch($this.Branding) {
 			Release { "Windows Terminal" }
 			Preview { "Windows Terminal Preview" }

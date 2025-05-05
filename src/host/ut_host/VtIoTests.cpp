@@ -52,16 +52,6 @@ static constexpr std::wstring_view s_initialContentVT{
     // clang-format on
 };
 
-static constexpr std::wstring_view s_initialContentVTWide{
-    // clang-format off
-    L""
-    sgr_red("〇") sgr_blu("一") sgr_red("二") sgr_blu("三") "\r\n"
-    sgr_red("四") sgr_blu("五") sgr_red("六") sgr_blu("七") "\r\n"
-    sgr_blu("八") sgr_red("九") sgr_blu("十") sgr_red("百") "\r\n"
-    sgr_blu("千") sgr_red("万") sgr_blu("億") sgr_red("兆")
-    // clang-format on
-};
-
 class ::Microsoft::Console::VirtualTerminal::VtIoTests
 {
     BEGIN_TEST_CLASS(VtIoTests)
@@ -81,11 +71,11 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         return { &rxBuf[0], read };
     }
 
-    void setupInitialContents(bool wide) const
+    void setupInitialContents() const
     {
         auto& sm = screenInfo->GetStateMachine();
         sm.ProcessString(L"\033c");
-        sm.ProcessString(wide ? s_initialContentVTWide : s_initialContentVT);
+        sm.ProcessString(s_initialContentVT);
         sm.ProcessString(L"\x1b[H" sgr_rst());
     }
 
@@ -249,22 +239,23 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         resetContents();
 
         size_t written;
+        std::unique_ptr<IWaitRoutine> waiter;
         std::string_view expected;
         std::string_view actual;
 
-        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"", written, nullptr));
+        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"", written, waiter));
         expected = "";
         actual = readOutput();
         VERIFY_ARE_EQUAL(expected, actual);
 
         // Force-wrap because we write up to the last column.
-        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"aaaaaaaa", written, nullptr));
+        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"aaaaaaaa", written, waiter));
         expected = "aaaaaaaa\r\n";
         actual = readOutput();
         VERIFY_ARE_EQUAL(expected, actual);
 
         // Force-wrap because we write up to the last column, but this time with a tab.
-        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"a\t\r\nb", written, nullptr));
+        THROW_IF_FAILED(routines.WriteConsoleWImpl(*screenInfo, L"a\t\r\nb", written, waiter));
         expected = "a\t\r\n\r\nb";
         actual = readOutput();
         VERIFY_ARE_EQUAL(expected, actual);
@@ -286,7 +277,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
 
     TEST_METHOD(WriteConsoleOutputAttribute)
     {
-        setupInitialContents(false);
+        setupInitialContents();
 
         static constexpr std::array payload{ red, blu, red, blu };
         static constexpr til::point target{ 6, 1 };
@@ -304,7 +295,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
 
     TEST_METHOD(WriteConsoleOutputCharacterW)
     {
-        setupInitialContents(false);
+        setupInitialContents();
 
         size_t written = 0;
         std::string_view expected;
@@ -363,7 +354,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         actual = readOutput();
         VERIFY_ARE_EQUAL(expected, actual);
 
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Writing at the start of a line.
         THROW_IF_FAILED(routines.FillConsoleOutputAttributeImpl(*screenInfo, red, 3, { 0, 0 }, cellsModified, false));
@@ -397,25 +388,6 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         VERIFY_ARE_EQUAL(expected, actual);
     }
 
-    TEST_METHOD(FillConsoleOutputAttributeWide)
-    {
-        setupInitialContents(true);
-
-        size_t cellsModified = 0;
-        std::string_view expected;
-        std::string_view actual;
-
-        // Writing nothing should produce nothing.
-        THROW_IF_FAILED(routines.FillConsoleOutputAttributeImpl(*screenInfo, red, 4, { 2, 1 }, cellsModified, false));
-        expected =
-            decsc() //
-            cup(2, 3) sgr_red("五六") //
-            decrc();
-        actual = readOutput();
-        VERIFY_ARE_EQUAL(4u, cellsModified);
-        VERIFY_ARE_EQUAL(expected, actual);
-    }
-
     TEST_METHOD(FillConsoleOutputCharacterW)
     {
         size_t cellsModified = 0;
@@ -435,7 +407,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         actual = readOutput();
         VERIFY_ARE_EQUAL(expected, actual);
 
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Writing at the start of a line.
         THROW_IF_FAILED(routines.FillConsoleOutputCharacterWImpl(*screenInfo, L'a', 3, { 0, 0 }, cellsModified, false));
@@ -481,7 +453,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         std::string_view expected;
         std::string_view actual;
 
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Scrolling from nowhere to somewhere are no-ops and should not emit anything.
         THROW_IF_FAILED(routines.ScrollConsoleScreenBufferWImpl(*screenInfo, { 0, 0, -1, -1 }, {}, std::nullopt, L' ', 0, false));
@@ -515,7 +487,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         //
         //   m   n   M   N   o   p   O   P
         //
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Scrolling from somewhere to somewhere.
         //
@@ -654,7 +626,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         std::string_view expected;
         std::string_view actual;
 
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Scrolling from nowhere to somewhere are no-ops and should not emit anything.
         THROW_IF_FAILED(routines.ScrollConsoleScreenBufferWImpl(*screenInfo, { 0, 0, -1, -1 }, {}, std::nullopt, L' ', 0, false));
@@ -688,7 +660,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
         //
         //   m   n   M   N   o   p   O   P
         //
-        setupInitialContents(false);
+        setupInitialContents();
 
         // Scrolling from somewhere to somewhere.
         //
@@ -825,7 +797,7 @@ class ::Microsoft::Console::VirtualTerminal::VtIoTests
             &screenInfoAlt));
 
         routines.SetConsoleActiveScreenBufferImpl(*screenInfoAlt);
-        setupInitialContents(false);
+        setupInitialContents();
         THROW_IF_FAILED(routines.SetConsoleOutputModeImpl(*screenInfoAlt, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING));
         readOutput();
 

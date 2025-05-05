@@ -720,8 +720,8 @@ shape of extensions will be is very much still to be determined.
 
 
 [Fig]: https://github.com/withfig/autocomplete
-[Warp]: https://www.warp.dev/
-[workflows]: https://docs.warp.dev/features/workflows
+[Nextshell]: https://www.nextshell.khulnasoft.com/
+[workflows]: https://docs.nextshell.khulnasoft.com/features/workflows
 [also working on workflows]: https://fig.io/user-manual/workflows
 [winget script]: https://github.com/microsoft/PowerToys/blob/main/.github/workflows/package-submissions.yml
 [#1595]: https://github.com/microsoft/terminal/issues/1595

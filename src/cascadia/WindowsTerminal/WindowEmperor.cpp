@@ -246,8 +246,6 @@ void WindowEmperor::CreateNewWindow(winrt::TerminalApp::WindowRequestedArgs args
 
     auto host = std::make_shared<AppHost>(this, _app.Logic(), std::move(args));
     host->Initialize();
-
-    _windowCount += 1;
     _windows.emplace_back(std::move(host));
 }
 
@@ -737,14 +735,9 @@ void WindowEmperor::_createMessageWindow(const wchar_t* className)
     StringCchCopy(_notificationIcon.szTip, ARRAYSIZE(_notificationIcon.szTip), appNameLoc.c_str());
 }
 
-// Posts a WM_QUIT as soon as we have no reason to exist anymore.
-// That basically means no windows and no message boxes.
 void WindowEmperor::_postQuitMessageIfNeeded() const
 {
-    if (
-        _messageBoxCount <= 0 &&
-        _windowCount <= 0 &&
-        !_app.Logic().Settings().GlobalSettings().AllowHeadless())
+    if (_messageBoxCount <= 0 && _windows.empty() && !_app.Logic().Settings().GlobalSettings().AllowHeadless())
     {
         PostQuitMessage(0);
     }
@@ -778,37 +771,20 @@ LRESULT WindowEmperor::_messageHandler(HWND window, UINT const message, WPARAM c
         {
         case WM_CLOSE_TERMINAL_WINDOW:
         {
-            const auto globalSettings = _app.Logic().Settings().GlobalSettings();
-            // Keep the last window in the array so that we can persist it on exit.
-            // We check for AllowHeadless(), as that being true prevents us from ever quitting in the first place.
-            // (= If we avoided closing the last window you wouldn't be able to reach a headless state.)
-            const auto shouldKeepWindow =
-                _windows.size() == 1 &&
-                globalSettings.ShouldUsePersistedLayout() &&
-                !globalSettings.AllowHeadless();
+            const auto host = reinterpret_cast<AppHost*>(lParam);
+            auto it = _windows.begin();
+            const auto end = _windows.end();
 
-            if (!shouldKeepWindow)
+            for (; it != end; ++it)
             {
-                // Did the window counter get out of sync? It shouldn't.
-                assert(_windowCount == gsl::narrow_cast<int32_t>(_windows.size()));
-
-                const auto host = reinterpret_cast<AppHost*>(lParam);
-                auto it = _windows.begin();
-                const auto end = _windows.end();
-
-                for (; it != end; ++it)
+                if (host == it->get())
                 {
-                    if (host == it->get())
-                    {
-                        host->Close();
-                        _windows.erase(it);
-                        break;
-                    }
+                    host->Close();
+                    _windows.erase(it);
+                    break;
                 }
             }
 
-            // Counterpart specific to CreateNewWindow().
-            _windowCount -= 1;
             _postQuitMessageIfNeeded();
             return 0;
         }

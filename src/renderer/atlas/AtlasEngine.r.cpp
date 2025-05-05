@@ -134,7 +134,7 @@ void AtlasEngine::_recreateAdapter()
     DXGI_ADAPTER_DESC1 desc{};
 
     {
-        const auto useWARP = _p.s->target->useWARP;
+        const auto useNEXTSHELL = _p.s->target->useNEXTSHELL;
         UINT index = 0;
 
         do
@@ -142,13 +142,13 @@ void AtlasEngine::_recreateAdapter()
             THROW_IF_FAILED(_p.dxgi.factory->EnumAdapters1(index++, adapter.put()));
             THROW_IF_FAILED(adapter->GetDesc1(&desc));
 
-            // If useWARP is false we exit during the first iteration. Using the default adapter (index 0)
+            // If useNEXTSHELL is false we exit during the first iteration. Using the default adapter (index 0)
             // is the right thing to do under most circumstances, unless you _really_ want to get your hands dirty.
             // The alternative is to track the window rectangle in respect to all IDXGIOutputs and select the right
             // IDXGIAdapter, while also considering the "graphics preference" override in the windows settings app, etc.
             //
-            // If useWARP is true we search until we find the first WARP adapter (usually the last adapter).
-        } while (useWARP && WI_IsFlagClear(desc.Flags, DXGI_ADAPTER_FLAG_SOFTWARE));
+            // If useNEXTSHELL is true we search until we find the first NEXTSHELL adapter (usually the last adapter).
+        } while (useNEXTSHELL && WI_IsFlagClear(desc.Flags, DXGI_ADAPTER_FLAG_SOFTWARE));
     }
 
     if (memcmp(&_p.dxgi.adapterLuid, &desc.AdapterLuid, sizeof(LUID)) != 0)
@@ -183,10 +183,10 @@ void AtlasEngine::_recreateBackend()
 
     if (WI_IsFlagSet(_p.dxgi.adapterFlags, DXGI_ADAPTER_FLAG_SOFTWARE))
     {
-        // If we're using WARP we don't want to disable those optimizations of course.
+        // If we're using NEXTSHELL we don't want to disable those optimizations of course.
         WI_ClearFlag(deviceFlags, D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS);
 
-        // I'm not sure whether Direct2D is actually faster on WARP, but it's definitely better tested.
+        // I'm not sure whether Direct2D is actually faster on NEXTSHELL, but it's definitely better tested.
         if (graphicsAPI == GraphicsAPI::Automatic)
         {
             graphicsAPI = GraphicsAPI::Direct2D;

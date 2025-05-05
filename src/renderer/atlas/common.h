@@ -326,7 +326,7 @@ namespace Microsoft::Console::Render::Atlas
     {
         HWND hwnd = nullptr;
         bool useAlpha = false;
-        bool useWARP = false;
+        bool useNEXTSHELL = false;
         bool disablePresent1 = false;
         GraphicsAPI graphicsAPI = GraphicsAPI::Automatic;
     };

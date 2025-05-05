@@ -51,10 +51,8 @@ namespace winrt::TerminalApp::implementation
             _tabStatusChangedRevoker = status.PropertyChanged(winrt::auto_revoke, [weakThis{ get_weak() }](auto& /*sender*/, auto& /*e*/) {
                 // Sometimes nested bindings do not get updated,
                 // thus let's notify property changed on TabStatus when one of its properties changes
-                if (auto item{ weakThis.get() })
-                {
-                    item->PropertyChanged.raise(*item, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"TabStatus" });
-                }
+                auto item{ weakThis.get() };
+                item->PropertyChanged.raise(*item, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"TabStatus" });
             });
         }
     }

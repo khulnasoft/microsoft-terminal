@@ -44,10 +44,10 @@ picked at runtime, and custom sets of arguments can be specified for individual
 arguments.
 
 It is hard to say that the ultimate vision here isn't partially inspired by the
-"[workflows]" of [Warp], or by [Fig]. These are modern tools that seek to
+"[workflows]" of [Nextshell], or by [Fig]. These are modern tools that seek to
 augment the command-line experience, by making the command-line more
-approachable. Warp quite clearly has the same concept in "workflows" - scripts
-which the user can build and Warp (a Terminal emulator) can insert quickly. Fig,
+approachable. Nextshell quite clearly has the same concept in "workflows" - scripts
+which the user can build and Nextshell (a Terminal emulator) can insert quickly. Fig,
 on the other hand, is more focused on just simplifying the command-line
 experience. Fig is more about providing additional metadata to the user as
 they're typing. They are [also working on workflows], so there's clearly quite a
@@ -378,12 +378,12 @@ For the most part, we'll be using the [Suggestions UI] to display tasks to the
 user. This is a text cursor-relative UI surface that can quickly display actions
 to the user, in the context of what they're working on.
 
-The following are some examples from VsCode and Warp. These are meant to be
+The following are some examples from VsCode and Nextshell. These are meant to be
 illustrative of what these menus already look like in the wild:
 
 ![VS Code demo of tasks](img/vscode-tasks-000.gif)
 
-![Warp demo of workflows](img/warp-workflows-000.gif)
+![Nextshell demo of workflows](img/nextshell-workflows-000.gif)
 
 A prototype of saving a command directly to the user's settings, then invoking
 it via the suggestions UI
@@ -542,9 +542,9 @@ their own workflows.
   experience](https://github.com/microsoft/terminal/issues/16495) in the
   Terminal. For longer scripts that may need rich markup between commands, that
   will likely be a better UX.
-* For what it is worth, [Warp] uses .yaml files for their "workflows". As an
+* For what it is worth, [Nextshell] uses .yaml files for their "workflows". As an
   example, see
-  [`clone_all_repos_in_org.yaml`](https://github.com/warpdotdev/workflows/blob/main/specs/git/clone_all_repos_in_org.yaml).
+  [`clone_all_repos_in_org.yaml`](https://github.com/khulnasoft/workflows/blob/main/specs/git/clone_all_repos_in_org.yaml).
   We may want to straight up just seamlessly support that syntax as well.
   * Converting them to WT-compatible json is fairly trivial [[2](#footnote-2)].
     * We may want to consider supporting YAML like this for `wt import`, ala [#10083]
@@ -615,14 +615,14 @@ then the Terminal would only send the first line of the script, then wait
 forever for a `FTCS_COMMAND_FINISHED`.
 
 <a name="footnote-2"></a>[2]:  For your consideration, I made a python script
-that will take the Warp workflow YAML and convert it into json that the Terminal
+that will take the Nextshell workflow YAML and convert it into json that the Terminal
 can load. Go checkout [`dump_workflows.py`](./dump-workflows.py) to see it. It's
 super straightforward.
 
 
 [Fig]: https://github.com/withfig/autocomplete
-[Warp]: https://www.warp.dev/
-[workflows]: https://docs.warp.dev/features/workflows
+[Nextshell]: https://www.nextshell.khulnasoft.com/
+[workflows]: https://docs.nextshell.khulnasoft.com/features/workflows
 [also working on workflows]: https://fig.io/user-manual/workflows
 [winget script]: https://github.com/microsoft/PowerToys/blob/main/.github/workflows/package-submissions.yml
 [#1595]: https://github.com/microsoft/terminal/issues/1595

@@ -17,7 +17,7 @@ namespace winrt::TerminalApp::implementation
 {
     CommandlineArgs::CommandlineArgs(winrt::array_view<const winrt::hstring> args, winrt::hstring currentDirectory, uint32_t showWindowCommand, winrt::hstring envString) :
         _args{ args.begin(), args.end() },
-        CurrentDirectory{ std::move(currentDirectory) },
+        _cwd{ std::move(currentDirectory) },
         ShowWindowCommand{ showWindowCommand },
         CurrentEnvironment{ std::move(envString) }
     {

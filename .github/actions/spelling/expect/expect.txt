@@ -86,7 +86,6 @@ autoscrolling
 Autowrap
 AVerify
 awch
-AZCOPY
 azurecr
 AZZ
 backgrounded
@@ -1417,7 +1416,6 @@ propvar
 propvariant
 propvarutil
 psa
-PSCRED
 PSECURITY
 pseudoconsole
 pseudoterminal
@@ -1679,7 +1677,6 @@ SMARTQUOTE
 SMTO
 snapcx
 snapcy
-snk
 SOLIDBOX
 Solutiondir
 somefile
@@ -1948,7 +1945,6 @@ VPACKMANIFESTDIRECTORY
 VPR
 VREDRAW
 vsc
-vsconfig
 vscprintf
 VSCROLL
 vsdevshell

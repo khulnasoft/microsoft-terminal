@@ -78,11 +78,8 @@ public:
     virtual void TabSet(const VTParameter setType) = 0; // DECST8C
     virtual void SetColorTableEntry(const size_t tableIndex, const DWORD color) = 0; // OSCSetColorTable
     virtual void RequestColorTableEntry(const size_t tableIndex) = 0; // OSCGetColorTable
-    virtual void ResetColorTable() = 0; // OSCResetColorTable
-    virtual void ResetColorTableEntry(const size_t tableIndex) = 0; // OSCResetColorTable
-    virtual void SetXtermColorResource(const size_t resource, const DWORD color) = 0; // OSCSetDefaultForeground, OSCSetDefaultBackground, OSCSetCursorColor
+    virtual void SetXtermColorResource(const size_t resource, const DWORD color) = 0; // OSCSetDefaultForeground, OSCSetDefaultBackground, OSCSetCursorColor, OSCResetCursorColor
     virtual void RequestXtermColorResource(const size_t resource) = 0; // OSCGetDefaultForeground, OSCGetDefaultBackground, OSCGetCursorColor
-    virtual void ResetXtermColorResource(const size_t resource) = 0; // OSCResetForegroundColor, OSCResetBackgroundColor, OSCResetCursorColor, OSCResetHighlightColor
     virtual void AssignColor(const DispatchTypes::ColorItem item, const VTInt fgIndex, const VTInt bgIndex) = 0; // DECAC
 
     virtual void EraseInDisplay(const DispatchTypes::EraseType eraseType) = 0; // ED
@@ -148,6 +145,12 @@ public:
     virtual void DoConEmuAction(const std::wstring_view string) = 0;
 
     virtual void DoITerm2Action(const std::wstring_view string) = 0;
+
+    virtual void DoNextshellInBandGeneratorAction() = 0;
+
+    virtual void DoNextshellAction() = 0;
+
+    virtual void DoNextshellResetGridAction() = 0;
 
     virtual void DoFinalTermAction(const std::wstring_view string) = 0;
 

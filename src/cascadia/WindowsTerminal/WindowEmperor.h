@@ -55,7 +55,6 @@ private:
     safe_void_coroutine _dispatchCommandlineCurrentDesktop(winrt::TerminalApp::CommandlineArgs args);
     LRESULT _messageHandler(HWND window, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     void _createMessageWindow(const wchar_t* className);
-    bool _shouldSkipClosingWindows() const;
     void _postQuitMessageIfNeeded() const;
     safe_void_coroutine _showMessageBox(winrt::hstring message, bool error);
     void _notificationAreaMenuRequested(WPARAM wParam);
@@ -78,7 +77,6 @@ private:
     bool _forcePersistence = false;
     bool _needsPersistenceCleanup = false;
     std::optional<bool> _currentSystemThemeIsDark;
-    int32_t _windowCount = 0;
     int32_t _messageBoxCount = 0;
 
 #ifdef NDEBUG

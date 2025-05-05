@@ -36,6 +36,7 @@ namespace winrt::TerminalApp::implementation
         ::TerminalApp::AppCommandlineArgs _parsed;
         int32_t _parseResult = 0;
         winrt::com_array<winrt::hstring> _args;
+        winrt::hstring _cwd;
     };
 
     struct RequestReceiveContentArgs : RequestReceiveContentArgsT<RequestReceiveContentArgs>

@@ -178,6 +178,7 @@ namespace Microsoft::Console::VirtualTerminal
             DECRSTS_RestoreTerminalState = VTID("$p"),
             DECRQSS_RequestSetting = VTID("$q"),
             DECRSPS_RestorePresentationState = VTID("$t"),
+            DCS_NEXTSHELL = VTID("d"),
         };
 
         enum Vt52ActionCodes : uint64_t
@@ -214,15 +215,16 @@ namespace Microsoft::Console::VirtualTerminal
             SetHighlightColor = 17,
             DECSWT_SetWindowTitle = 21,
             SetClipboard = 52,
-            ResetColor = 104,
-            ResetForegroundColor = 110,
-            ResetBackgroundColor = 111,
+            ResetForegroundColor = 110, // Not implemented
+            ResetBackgroundColor = 111, // Not implemented
             ResetCursorColor = 112,
-            ResetHighlightColor = 117,
             FinalTermAction = 133,
             VsCodeAction = 633,
             ITerm2Action = 1337,
             WTAction = 9001,
+            NextshellInBandGeneratorAction = 9277,
+            NextshellAction = 9278,
+            NextshellResetGridAction = 9279,
         };
 
         bool _GetOscSetColorTable(const std::wstring_view string,

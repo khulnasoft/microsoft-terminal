@@ -73,7 +73,7 @@ namespace winrt::Microsoft::Terminal::Control::implementation
             //
             // To alleviate, make sure to disable the UIA engine and remove it,
             // and ALSO disable the renderer. Core.Detach will take care of the
-            // TriggerTeardown (which will stop the renderer
+            // WaitForPaintCompletionAndDisable (which will stop the renderer
             // after all current engines are done painting).
             //
             // Simply disabling the UIA engine is not enough, because it's
@@ -340,7 +340,7 @@ namespace winrt::Microsoft::Terminal::Control::implementation
                                             const Core::Point pixelPosition,
                                             const bool pointerPressedInBounds)
     {
-        const auto terminalPosition = _getTerminalPosition(til::point{ pixelPosition }, false);
+        const auto terminalPosition = _getTerminalPosition(til::point{ pixelPosition }, true);
         // Returning true from this function indicates that the caller should do no further processing of this movement.
         bool handledCompletely = false;
 
@@ -489,7 +489,7 @@ namespace winrt::Microsoft::Terminal::Control::implementation
                                           const Core::Point pixelPosition,
                                           const Control::MouseButtonState buttonState)
     {
-        const auto terminalPosition = _getTerminalPosition(til::point{ pixelPosition }, false);
+        const auto terminalPosition = _getTerminalPosition(til::point{ pixelPosition }, true);
 
         // Short-circuit isReadOnly check to avoid warning dialog.
         //

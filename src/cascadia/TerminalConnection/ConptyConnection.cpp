@@ -428,20 +428,6 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
             TerminalOutput.raise(L"\r\n");
             TerminalOutput.raise(badPathText);
         }
-        // If the requested action requires elevation, display appropriate message
-        else if (hr == HRESULT_FROM_WIN32(ERROR_ELEVATION_REQUIRED))
-        {
-            const auto elevationText = RS_(L"ElevationRequired");
-            TerminalOutput.raise(L"\r\n");
-            TerminalOutput.raise(elevationText);
-        }
-        // If the requested executable was not found, display appropriate message
-        else if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
-        {
-            const auto fileNotFoundText = RS_(L"FileNotFound");
-            TerminalOutput.raise(L"\r\n");
-            TerminalOutput.raise(fileNotFoundText);
-        }
 
         _transitionToState(ConnectionState::Failed);
 
@@ -794,12 +780,12 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
 
     void ConptyConnection::StartInboundListener()
     {
-        static const auto init = []() noexcept {
-            CTerminalHandoff::s_setCallback(&ConptyConnection::NewHandoff);
-            return true;
-        }();
+        THROW_IF_FAILED(CTerminalHandoff::s_StartListening(&ConptyConnection::NewHandoff));
+    }
 
-        CTerminalHandoff::s_StartListening();
+    void ConptyConnection::StopInboundListener()
+    {
+        THROW_IF_FAILED(CTerminalHandoff::s_StopListening());
     }
 
     // Function Description:
